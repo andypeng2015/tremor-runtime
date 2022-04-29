@@ -24,7 +24,7 @@ use tremor_runtime::{
     config,
     postprocessor::Postprocessor,
     preprocessor::Preprocessor,
-    system::{ShutdownMode, World, WorldConfig},
+    system::{World, WorldConfig},
 };
 use tremor_script::{
     arena::Arena,
@@ -424,11 +424,9 @@ impl Run {
             debug_connectors: true,
             ..WorldConfig::default()
         };
-        let (world, _handle) = World::start(config).await?;
+        let (world, handle) = World::start(config).await?;
         tremor_runtime::load_troy_file(&world, &self.script).await?;
-        async_std::task::sleep(std::time::Duration::from_millis(150_000)).await;
-        world.stop(ShutdownMode::Graceful).await?;
-
+        handle.await?;
         Ok(())
     }
 
